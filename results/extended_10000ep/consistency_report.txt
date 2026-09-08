@@ -1,0 +1,10 @@
+Consistency check: F  vs  E - T*S
+==============================================
+runs                 : 50 seeds x 10000 epochs = 500000 rows
+mean |F - (E - T*S)| : 3.939006e-15
+max  |F - (E - T*S)| : 3.552714e-14
+median               : 1.776357e-15
+mean relative error  : 2.274387e-16
+
+fraction of epochs with delta_F < 0 : 0.3015
+master file          : C:/Git_repos/forks/Thesis-Source/results/extended_10000ep\all_runs.csv

@@ -1,0 +1,37 @@
+RBM thermodynamics -- summary
+==============================================
+source directory      : C:\Git_repos\forks\Thesis-Source\results\extended_10000ep
+seeds                 : 50
+epochs per run        : 10000
+rows                  : 500000
+temperature           : [1.] (constant)
+
+Consistency check  F  vs  E - T*S
+  mean |F - (E - T*S)| : 3.939006e-15
+  max  |F - (E - T*S)| : 3.552714e-14
+  mean relative error  : 2.274387e-16
+
+Free energy
+  F(epoch 1)   mean +/- sd : -5.6416 +/- 0.0842
+  F(epoch 10000) mean +/- sd : -20.9299 +/- 2.3766
+  net change            : -15.2883
+  fraction of epoch steps with delta_F < 0 : 0.3015
+  mean delta_F                             : -1.528983e-03
+  fraction of seeds with F(last) < F(first): 1.0000
+
+Coarse-grained free-energy decrease  (fraction of windows with F[n+W] - F[n] < 0)
+  W =     1 : 0.3015
+  W =     2 : 0.3871
+  W =     5 : 0.5082
+  W =    10 : 0.5835
+  W =    20 : 0.6441
+  W =    50 : 0.7286
+  W =   100 : 0.8013
+  W =   200 : 0.8663
+  W =   500 : 0.9301
+  W =  1000 : 0.9750
+
+Energy / entropy
+  <E>(1) -> <E>(10000) : -0.1039 -> -18.8746
+  S(1)   -> S(10000)   : +5.5377 -> +2.0553
+  ln(2^(n_v+n_h)) = ln(256) = 5.5452  (maximum-entropy / uniform model)
