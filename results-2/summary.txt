@@ -1,0 +1,45 @@
+F_min vs F_final  (50 seeds x 500 epochs)
+------------------------------------------------------------
+F_min <= F_final holds for every seed by construction.
+gap F_final - F_min   observed: median 0.630  mean 0.626  [0.258, 0.974]
+                      null    : median 0.554  mean 0.560
+epoch of F_min        observed: median 70   null: median 71
+F_min at epoch <= 10  : 6 / 50 seeds
+F_final < F_first     : 1 / 50 seeds
+per-seed AR(1) phi    : median 0.930  [0.821, 0.962]
+gap percentile in own null: >0.95 for 7 seeds, <0.05 for 2 seeds (expected ~2.5 each under the null)
+KS test percentiles vs Uniform(0,1): D = 0.205, p = 0.026
+seed 40: F_first -5.523  F_min -5.829 @ epoch 263  F_final -5.266  gap 0.563  (null 90% range 0.271-0.861, percentile 0.52)
+seed 50: F_first -5.606  F_min -5.968 @ epoch 48  F_final -5.393  gap 0.575  (null 90% range 0.290-0.852, percentile 0.52)
+
+Phase space (500 epochs): E in [-0.689, 0.555], S in [5.3971, 5.5437] (ln 256 = 5.5452), F in [-6.177, -4.860]
+representative (median F_final) seed: 21
+
+Distribution of F across seeds
+  epoch   50: mean -5.565  std 0.159  [-5.933, -5.256]  skew -0.42  BC 0.420  Shapiro p 0.335
+  epoch  100: mean -5.512  std 0.157  [-5.900, -5.156]  skew +0.34  BC 0.348  Shapiro p 0.225
+  epoch  250: mean -5.430  std 0.150  [-5.792, -5.202]  skew -0.41  BC 0.469  Shapiro p 0.097
+  epoch  500: mean -5.303  std 0.150  [-5.555, -4.977]  skew +0.23  BC 0.396  Shapiro p 0.373
+  (BC > 0.555 would suggest bimodality)
+
+Long runs (10 seeds x 5000 epochs)
+------------------------------------------------------------
+F: epoch 1 -5.621 +/- 0.116  ->  epoch 5000 -17.084 +/- 1.218
+KL: epoch 1 0.985  ->  epoch 5000 0.175 +/- 0.042   (uniform model: ln(16/6) = 0.981)
+F drift over last 1000 epochs: median -2.008  (per-seed residual std median 0.115)
+seeds still drifting (|drift| > 3 x resid std): 10 / 10
+identical to results/extended_10000ep over epochs 1-5000: max |dF| = 0.00e+00
+  same seeds in the 10k run, epoch  5000: F = -17.084 +/- 1.218
+  same seeds in the 10k run, epoch  7500: F = -19.825 +/- 1.750
+  same seeds in the 10k run, epoch 10000: F = -21.282 +/- 1.935
+
+Spearman correlation with KL  (pooled levels | within-seed median | increments)
+  500ep  E       -0.163 | -0.170 | -0.194
+  500ep  S       -0.098 | -0.120 | -0.917
+  500ep  F       -0.160 | -0.150 | -0.133
+  500ep  F_data  -0.122 | -0.108 | -0.085
+  5000ep E       +0.968 | +0.976 | -0.462
+  5000ep S       +0.978 | +0.978 | -0.734
+  5000ep F       +0.952 | +0.965 | -0.343
+  5000ep F_data  +0.956 | +0.969 | -0.188
+Identity: KL = beta*(F_data - F) - ln 6, so F enters the learning objective with a MINUS sign.
