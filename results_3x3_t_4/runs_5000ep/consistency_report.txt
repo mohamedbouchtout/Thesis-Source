@@ -1,0 +1,5 @@
+Consistency checks  (10 seeds x 5000 epochs = 50000 rows)
+mean |F - (E - T*S)|               : 5.667147e-15
+max  |F - (E - T*S)|               : 4.263256e-14
+max  |KL - (beta(F_data-F) - ln14)| : 8.215650e-15
+KL matched RBM.KL_div_BIG_SMALL at epoch 1 of every seed (|diff| < 1e-10)
