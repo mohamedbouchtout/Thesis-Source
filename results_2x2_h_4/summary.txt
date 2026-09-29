@@ -42,4 +42,4 @@ Spearman correlation with KL  (pooled levels | within-seed median | increments)
   5000ep S       +0.978 | +0.978 | -0.734
   5000ep F       +0.952 | +0.965 | -0.343
   5000ep F_data  +0.956 | +0.969 | -0.188
-Identity: KL = beta*(F_data - F) - ln 6, so F enters the learning objective with a MINUS sign.
+Identity: KL = beta*(F_data - F) - ln 14, so F enters the learning objective with a MINUS sign.

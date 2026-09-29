@@ -15,6 +15,9 @@ Reads the per-epoch traces written by ``run_thermo_metrics.py`` and produces
   4. distributions_500ep.png      F, E, S across seeds at epochs 50/100/250/500
   5. long_runs_5000ep.png         E, S, F, KL, reconstruction error, data mass
   6. thermo_vs_learning.png       E, S, F, F_data against KL for both sweeps
+  7. phase_F_vs_S_temperature.png F vs S across temperatures, 500/5000 epochs
+     KL_vs_epoch_temperature.png  ensemble KL trajectories, 500/5000 epochs
+     final_KL_vs_temperature.png  final KL across temperatures, 500/5000 epochs
 
 plus tables/*.csv and summary.txt.
 
@@ -453,6 +456,80 @@ def fig_thermo_learning(d500, d5000, outdir, name):
     save(fig, outdir, name)
 
 
+def fig_phase_temperature(d500, d5000, outdir, name):
+    temperatures = np.sort(np.concatenate(
+        [d500.temperature.unique(), d5000.temperature.unique()]))
+    norm = plt.Normalize(temperatures.min(), temperatures.max())
+    fig, axes = plt.subplots(1, 2, figsize=(12.0, 5.0), sharex=True, sharey=True,
+                             layout="constrained")
+    for ax, df, label in zip(axes, (d500, d5000), ("500 epochs", "5000 epochs")):
+        sc = ax.scatter(df.S, df.F, c=df.temperature, cmap="plasma", norm=norm,
+                        s=5, alpha=0.35, lw=0, rasterized=True)
+        ax.set_title(label, loc="left", color=INK_MUTED, fontsize=10)
+        ax.set_xlabel(r"entropy  $S$")
+        ax.grid(True)
+    axes[0].set_ylabel(r"free energy  $F$")
+    cb = fig.colorbar(sc, ax=axes, fraction=0.03, pad=0.02)
+    cb.set_label("temperature")
+    save(fig, outdir, name)
+
+
+def fig_kl_temperature(d500, d5000, outdir, name):
+    temperatures = np.sort(np.concatenate(
+        [d500.temperature.unique(), d5000.temperature.unique()]))
+    norm = plt.Normalize(temperatures.min(), temperatures.max())
+    cmap = plt.get_cmap("plasma")
+    fig, axes = plt.subplots(1, 2, figsize=(13.0, 4.6), sharey=True)
+    for ax, df, label in zip(axes, (d500, d5000), ("500 epochs", "5000 epochs")):
+        grouped = df.groupby(["temperature", "epoch"]).KL.agg(
+            ["mean", "std"]).reset_index()
+        for temperature in np.sort(grouped.temperature.unique()):
+            d = grouped[grouped.temperature == temperature]
+            color = cmap(norm(temperature))
+            ax.plot(d.epoch, d["mean"], color=color, lw=1.6,
+                    label="T = %g" % temperature)
+            spread = d["std"].fillna(0).to_numpy()
+            ax.fill_between(d.epoch, d["mean"] - spread, d["mean"] + spread,
+                            color=color, alpha=0.12, linewidth=0)
+        ax.set_xlabel("epoch")
+        ax.set_title(label, loc="left", color=INK_MUTED, fontsize=10)
+        ax.grid(True, axis="y")
+        ax.legend(title="temperature", ncol=2)
+    axes[0].set_ylabel(r"$D_{KL}(p_{data}\,\|\,p_{model})$")
+    fig.tight_layout()
+    save(fig, outdir, name)
+
+
+def fig_final_kl_temperature(d500, d5000, outdir, name):
+    fig, axes = plt.subplots(1, 2, figsize=(11.0, 4.4), sharey=True)
+    summaries = []
+    for ax, df, label in zip(axes, (d500, d5000), ("500 epochs", "5000 epochs")):
+        final = (df.sort_values("epoch")
+                 .groupby(["temperature", "seed"], as_index=False).tail(1))
+        summary = (final.groupby("temperature").KL
+                   .agg(["mean", "std", "count"]).reset_index())
+        summary["std"] = summary["std"].fillna(0)
+        summary["epochs"] = label
+        summaries.append(summary)
+        ax.errorbar(summary.temperature, summary["mean"], yerr=summary["std"],
+                    fmt="o-", color=C1, ecolor=LIGHT, capsize=3, lw=1.5,
+                    markersize=5, zorder=3)
+        for _, row in summary.iterrows():
+            ax.annotate("%d seeds" % row["count"],
+                        (row.temperature, row["mean"]),
+                        xytext=(0, 7), textcoords="offset points",
+                        ha="center", fontsize=8, color=INK_MUTED)
+        ax.set_xlabel("temperature")
+        ax.set_title(label, loc="left", color=INK_MUTED, fontsize=10)
+        ax.grid(True, axis="y")
+    axes[0].set_ylabel(r"final $D_{KL}(p_{data}\,\|\,p_{model})$")
+    fig.tight_layout()
+    save(fig, outdir, name)
+    pd.concat(summaries, ignore_index=True).to_csv(
+        os.path.join(outdir, "..", "tables", name.replace(".png", ".csv")),
+        index=False)
+
+
 # --------------------------------------------------------------------------- main
 def main():
     p = argparse.ArgumentParser(description=__doc__,
@@ -584,6 +661,9 @@ def main():
 
     # 6 ----------------------------------------------------------------------
     fig_thermo_learning(d500, d5000, figdir, "thermo_vs_learning.png")
+    fig_phase_temperature(d500, d5000, figdir, "phase_F_vs_S_temperature.png")
+    fig_kl_temperature(d500, d5000, figdir, "KL_vs_epoch_temperature.png")
+    fig_final_kl_temperature(d500, d5000, figdir, "final_KL_vs_temperature.png")
     ct = pd.concat([corr_table(d500, "500ep"), corr_table(d5000, "5000ep")], ignore_index=True)
     ct.to_csv(os.path.join(tabdir, "correlations.csv"), index=False)
     lines.append("Spearman correlation with KL  (pooled levels | within-seed median | increments)")
